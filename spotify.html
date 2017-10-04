@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Spotyfinder 😎</h1>
+                <form id="search">
+                    <input class="input-lg" type="" name="query">
+                    <button class="btn btn-lg btn-primary">Search Artist</button>
+                </form>
+            </div>
+        </div>
+        <div id="artists" class="jumbotron">
+            <div class="container">
+                <h1>Artists</h1>
+                <select class="input-lg">
+                </select>
+            </div>
+        </div>
+        <div id= "albums" class="jumbotron">
+          <div class="container">
+            <div class="container">
+                <h1>Albums</h1>
+                <select class="input-lg"></select>
+            </div>
+          </div>
+        </div>
+        <div id="tracks" class="jumbotron">
+          <div class="container">
+                <h1>Tracks</h1>
+                <select class="input-lg"></select>
+          </div>
+        </div>
+        <div>
+          <p>Play your song</p>
+          <iframe src='' class='thirtySeconds' width='300' heigth='380' frameborder='0' allowtransparency='true'></iframe> 
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript">
+    var token = 'BQBGHUFT3Km-QGChIuxL1QchEb2b2NcOIP25pFvQvi-A3uh2sikEXpFJYSv5Z_PJpJy1aumr958i8TrU_Uyxt-_kX1nne9H2ccBDkaR-WEjxHxr64PravgTAnZJucrUUJ4mCRxZC3Q'
+
+    var idArtist = "7EzNTMzMN70jRxBWbxeshd"
+
+    $('#search').on('submit', function(e) {
+        e.preventDefault()
+        var query = $(this).find('input').val()
+
+        $.ajax({
+          url: 'https://api.spotify.com/v1/search',
+          data: {
+              q: query,
+              type: 'artist'
+          },
+          headers: {
+              Authorization: 'Bearer ' + token
+          }
+        })
+
+        .then(function(oData) {
+
+            var contentSelect = ''
+            //console.log(oData)
+
+            oData.artists.items.forEach(function (artists) {
+              contentSelect += '<option value=' + artists.id + '>'
+              contentSelect += artists.name
+              contentSelect += '</option>'
+            })
+            $('#artists select').html(contentSelect)
+        })
+    })
+
+    $('#artists select').on('change', function(e) {
+      e.preventDefault()
+      var artistSelected = $(this).val()
+      console.log( artistSelected );
+
+      $.ajax({
+        url: 'https://api.spotify.com/v1/artists/' + artistSelected + '/albums',
+        headers: {
+          Authorization: 'Bearer ' + token
+        }
+      })
+      .then(function(oData){
+        //console.log(oData)
+        //console.log(oData.items)
+        var albumSelect = ''
+
+        oData.items.forEach(function(albums) {
+          albumSelect += '<option value=' + albums.id + '>'
+          albumSelect += albums.name
+          albumSelect +='</option>'
+        })
+        $('#albums select').html(albumSelect)
+      })
+    })
+    $('#albums select').on('change',  function(e){
+      e.preventDefault()
+      var albumSelected= $(this).val()
+      console.log(albumSelected)
+    
+    $.ajax({
+      url:'https://api.spotify.com/v1/albums/' + albumSelected +'/tracks',
+      
+      headers: {
+          Authorization: 'Bearer ' + token
+        }
+      })
+      .then(function(oData){        
+        //console.log(oData.items)
+        var trackSelect= ''
+
+        oData.items.forEach(function(tracks){
+          trackSelect += '<option value=' + tracks.id + '>'
+          trackSelect += tracks.name
+          trackSelect +='</option>'
+        })
+        $('#tracks select').html(trackSelect)
+      })
+    })
+
+    $('#tracks select').on('change', function(e){
+      e.preventDefault()
+      var songSelect= $(this).val()
+    
+      console.log(songSelect)
+      var sourceSong = "https://open.spotify.com/embed/track/" + songSelect 
+
+      $('iframe').attr('src',sourceSong)
+      
+      /*setTimeout(function(){
+        $('iframe').fadeOut(0),     
+        }30000);*/
+    
+    })
+
+
+  
+    
+    </script>
+</body>
+
+</html>
